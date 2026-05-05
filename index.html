@@ -36,6 +36,18 @@
     "sameAs":["https://www.ie-miru.jp/cms/yoyaku/crights/events/124530"],
     "description":"住宅づくりのセカンドオピニオン。元大手ハウスメーカー出身者が中立に相談を承ります。年間8〜10棟限定の少数精鋭工務店。"
   }</script>
+  <!-- 構造化データ: FAQPage (検索AIサマリー枠獲得用) -->
+  <script type="application/ld+json">{
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {"@type":"Question","name":"相談は本当に無料ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。45分の初回相談は完全無料です。営業電話・しつこい売り込みは一切いたしません。"}},
+      {"@type":"Question","name":"ハウスメーカーで進めている途中でも相談できますか？","acceptedAnswer":{"@type":"Answer","text":"はい、契約直前の方が最も多くご相談に来られます。中立な立場で見積もり・仕様を整理します。相談だけして帰られる方が月の半分以上です。"}},
+      {"@type":"Question","name":"対応エリアはどこまでですか？","acceptedAnswer":{"@type":"Answer","text":"滋賀県全域・京都府南部が中心です。"}},
+      {"@type":"Question","name":"クライツに依頼しなくても相談できますか？","acceptedAnswer":{"@type":"Answer","text":"はい。私たちは『セカンドオピニオン』として中立に話を聞きます。整理した結果『ハウスメーカーで合っていた』とわかってお帰りになる方も歓迎です。"}},
+      {"@type":"Question","name":"年間8〜10棟限定とはどういうことですか？","acceptedAnswer":{"@type":"Answer","text":"社長自らが全現場を巡回監督するため、自社で品質管理できる範囲のみ受注しています。長年信頼関係のある職人だけと組み、無理な拡大はしません。"}}
+    ]
+  }</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet"/>
@@ -418,7 +430,13 @@
   <div class="hero-inner">
     <div class="hero-pill fi on"><div class="hero-pill-dot"></div>元大手ハウスメーカー出身スタッフによるセカンドオピニオン</div>
     <h1 class="hero-h1 fi on">その「なんか<br>違う」は、<br><span class="ac">正しい感覚です。</span></h1>
-    <p class="hero-lead fi on d1">見積もりは膨らみ、希望は削られ、比べる相手もいない。<br>元・売る側の私たちが、45分でその迷いを解きほぐします。</p>
+    <p class="hero-lead fi on d1">見積もりは膨らみ、希望は削られ、比べる相手もいない。<br>元・売る側の私たちが、<strong style="color:#F5C070">自分たちで建てる立場から</strong>45分で迷いを整理します。</p>
+    <!-- HERO直下 独自バッジ3点（差別化即提示）-->
+    <div class="hero-badges fi on d1" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px">
+      <span style="background:rgba(245,192,112,.15);color:#F5C070;border:1px solid rgba(245,192,112,.4);padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:700">📹 現場LIVE CAM公開</span>
+      <span style="background:rgba(245,192,112,.15);color:#F5C070;border:1px solid rgba(245,192,112,.4);padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:700">🎯 年間8〜10棟限定</span>
+      <span style="background:rgba(245,192,112,.15);color:#F5C070;border:1px solid rgba(245,192,112,.4);padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:700">🏛 全棟 許容応力度計算</span>
+    </div>
     <div class="hero-cta-row fi on d2">
       <button class="btn btn-or" onclick="book('visit')">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -542,7 +560,7 @@
 <!-- ▼▼▼ 追加: クライツに依頼する場合の特徴 (PDFソース統合) ▼▼▼ -->
 <section class="sec" style="background:linear-gradient(180deg,#fff 0%,#faf6f0 100%)">
   <div class="inner">
-    <div class="fi"><span class="label">If you choose us</span><h2>もしクライツに、<span class="hl">任せるとしたら。</span></h2><p style="font-size:14px;color:var(--sub);margin-top:12px;line-height:1.8">私たちは「セカンドオピニオン」だけでなく、自分たちでも家を建てる工務店です。<br>選んでいただいた場合、こうやって責任を持ちます。</p></div>
+    <div class="fi"><span class="label">If you choose us</span><h2>もしクライツに、<span class="hl">任せるとしたら。</span></h2><p style="font-size:14px;color:var(--sub);margin-top:12px;line-height:1.8"><strong style="color:var(--txt)">相談だけして帰られる方が、月の半分以上です。</strong><br>それでも私たちが本気でお話するのは、自分たちでも建てる立場だからです。</p></div>
 
     <div class="kr-feat-grid fi d1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:32px">
 
@@ -862,7 +880,7 @@
 ━━━━━━━━━━━━━━━━━━ -->
 <section class="cta-sec" id="contact">
   <div class="cta-inner">
-    <h2 class="cta-h fi on">まず話すだけで、<br><em>構いません。</em></h2>
+    <h2 class="cta-h fi on">45分後、<br><em>迷う理由がなくなります。</em></h2>
     <p class="cta-sub fi on d1">資料なし・手ぶらOK。判断を迫られる場ではありません。<br>45分で「次に何をすべきか」だけが明確になります。</p>
     <div class="cta-cards fi on d1">
       <div class="cta-card rec"><div class="cta-rec-tag">はじめての方はこちら</div><div class="cta-card-title">直接相談</div><div class="cta-card-sub">図面・見積もりを見ながらじっくり話せます</div><div class="cta-tags"><span class="cta-tag">対面</span><span class="cta-tag">時間制限なし</span><span class="cta-tag">無料</span></div></div>
@@ -930,6 +948,32 @@
       });
     }, {threshold: 0.1});
     heroObs.observe(hero);
+  })();
+
+  /* GA4 スクロール深度トラッキング (25/50/75/100%) */
+  (function(){
+    if (typeof gtag === 'undefined') return;
+    const fired = {};
+    [25,50,75,100].forEach(p => fired[p] = false);
+    window.addEventListener('scroll', () => {
+      const d = (window.scrollY + window.innerHeight) / document.body.scrollHeight * 100;
+      [25,50,75,100].forEach(p => {
+        if (d >= p && !fired[p]) {
+          fired[p] = true;
+          gtag('event','scroll_depth',{percent:p});
+        }
+      });
+    }, {passive:true});
+  })();
+
+  /* GA4 Layer2 トグル開閉計装 */
+  (function(){
+    const ltb = document.getElementById('ltb');
+    if (!ltb || typeof gtag === 'undefined') return;
+    ltb.addEventListener('click', () => {
+      const isOpen = ltb.getAttribute('aria-expanded') === 'true';
+      gtag('event', 'layer_toggle', {action: isOpen ? 'close' : 'open'});
+    });
   })();
 
   /* カウントアップ */
