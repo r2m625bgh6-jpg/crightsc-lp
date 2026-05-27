@@ -2,7 +2,43 @@
 <html lang="ja">
 <head>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-J2P0G10JEE"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-J2P0G10JEE');</script>
+  <script>
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments)}
+    gtag('js',new Date());
+    // UTM パラメータを sessionStorage に保存 → 全イベントに付与
+    (function(){
+      var qs = new URLSearchParams(location.search);
+      var utms = {};
+      ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k){
+        var v = qs.get(k);
+        if (v) { utms[k] = v; try{ sessionStorage.setItem(k, v); }catch(e){} }
+        else { try{ var s = sessionStorage.getItem(k); if (s) utms[k] = s; }catch(e){} }
+      });
+      gtag('config','G-J2P0G10JEE', {
+        send_page_view: true,
+        page_title: document.title,
+        page_location: location.href,
+        ...utms
+      });
+      window.__UTM__ = utms;
+    })();
+    // 滞在時間（30秒・60秒・180秒）と離脱前 engagement を送信
+    setTimeout(function(){if(typeof gtag!=='undefined')gtag('event','time_30s')},30000);
+    setTimeout(function(){if(typeof gtag!=='undefined')gtag('event','time_60s')},60000);
+    setTimeout(function(){if(typeof gtag!=='undefined')gtag('event','time_180s')},180000);
+    // 電話タップ・メール・LINE・地図クリック を自動計測
+    document.addEventListener('click', function(e){
+      var a = e.target.closest('a'); if (!a || typeof gtag === 'undefined') return;
+      var href = (a.getAttribute('href')||'').toLowerCase();
+      if (href.startsWith('tel:')) gtag('event','call_click',{tel:href.replace('tel:',''),location:a.textContent.trim().slice(0,30)});
+      else if (href.startsWith('mailto:')) gtag('event','email_click');
+      else if (href.includes('line.me')||href.includes('lin.ee')) gtag('event','line_click');
+      else if (href.includes('maps.google')||href.includes('maps.app')||href.includes('goo.gl/maps')) gtag('event','maps_click');
+      else if (href.includes('instagram.com')) gtag('event','sns_click',{platform:'instagram'});
+      else if (href.includes('youtube.com')||href.includes('youtu.be')) gtag('event','sns_click',{platform:'youtube'});
+    }, true);
+  </script>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>滋賀の工務店セカンドオピニオン｜大津・京都の注文住宅相談｜株式会社クライツ</title>

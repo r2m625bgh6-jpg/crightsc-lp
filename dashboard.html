@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>📊 クライツLP アクセス分析ダッシュボード</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+ :root{--g:#3a5a3a;--b:#b08840;--bg:#faf7f0;--card:#fff}
+ *{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:var(--bg);color:#222;margin:0;padding:14px;max-width:1100px;margin:0 auto;line-height:1.5}
+ h1{color:var(--g);font-size:22px;margin:0 0 4px}
+ .updated{color:#888;font-size:11px;margin-bottom:14px}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px}
+ .kpi{background:var(--card);border:1px solid #e5dec0;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+ .kpi .lbl{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.5px}
+ .kpi .val{font-size:24px;font-weight:800;color:var(--g);margin:4px 0}
+ .kpi .sub{font-size:10px;color:#888}
+ .card{background:var(--card);border:1px solid #e5dec0;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+ .card h2{font-size:14px;margin:0 0 10px;color:var(--g);border-bottom:2px solid var(--b);padding-bottom:4px}
+ table{width:100%;border-collapse:collapse;font-size:12px}
+ th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #eee}
+ th{background:#fafaf5;font-weight:600;color:#555}
+ .err{background:#fee;border:1px solid #faa;padding:12px;border-radius:6px;color:#a33;font-size:13px}
+ .ok{background:#efe;border:1px solid #afa;padding:10px;border-radius:6px;font-size:12px;color:#262}
+ button{background:var(--b);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px}
+</style>
+</head>
+<body>
+<h1>📊 クライツLP アクセス分析ダッシュボード</h1>
+<div class="updated" id="updated">読み込み中...</div>
+
+<div id="errorArea"></div>
+
+<div id="content" style="display:none">
+  <div class="grid">
+    <div class="kpi"><div class="lbl">直近28日 PV</div><div class="val" id="kpiPv">-</div><div class="sub" id="kpiPvAvg">-</div></div>
+    <div class="kpi"><div class="lbl">直近28日 UU</div><div class="val" id="kpiUu">-</div><div class="sub">ユニーク訪問者</div></div>
+    <div class="kpi"><div class="lbl">セッション</div><div class="val" id="kpiSession">-</div><div class="sub">訪問回数</div></div>
+    <div class="kpi" style="background:#fef3e2"><div class="lbl">📞 電話タップ</div><div class="val" id="kpiCall">-</div><div class="sub">CV指標</div></div>
+    <div class="kpi" style="background:#e8f5e9"><div class="lbl">💬 LINE</div><div class="val" id="kpiLine">-</div><div class="sub">CV指標</div></div>
+    <div class="kpi" style="background:#e3f2fd"><div class="lbl">🗺 地図クリック</div><div class="val" id="kpiMaps">-</div><div class="sub">来場意欲</div></div>
+    <div class="kpi" style="background:#fce4ec"><div class="lbl">⚡ 今いる人</div><div class="val" id="kpiRt">-</div><div class="sub">リアルタイム</div></div>
+  </div>
+
+  <div class="card">
+    <h2>📈 日次PV/UU推移</h2>
+    <canvas id="dailyChart" height="80"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>🚪 流入元 (どこから来た？)</h2>
+    <table id="sourcesTable"><thead><tr><th>ソース</th><th>メディア</th><th>UU</th><th>セッション</th><th>エンゲージ率</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>🎯 UTMキャンペーン別 (流入施策ごとの効果)</h2>
+    <table id="campaignsTable"><thead><tr><th>キャンペーン</th><th>UU</th><th>セッション</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>📱 デバイス内訳</h2>
+    <table id="devicesTable"><thead><tr><th>デバイス</th><th>UU</th><th>セッション</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>🎬 イベント (ユーザー行動 全種)</h2>
+    <table id="eventsTable"><thead><tr><th>イベント名</th><th>発生回数</th></tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:20px"><button onclick="location.reload()">🔄 更新</button> <a href="utm.html" style="margin-left:12px;color:var(--g)">🎯 UTM URL生成</a></div>
+
+<script>
+async function load(){
+  try {
+    const r = await fetch('ga4_data.json?_t=' + Date.now());
+    if (!r.ok) throw new Error('ga4_data.json が未生成 (HTTP ' + r.status + ')');
+    const d = await r.json();
+    render(d);
+  } catch(e) {
+    document.getElementById('errorArea').innerHTML = `
+      <div class="err"><b>📊 GA4 データ未取得</b><br>
+      ターミナルで以下を実行してください:<br>
+      <code>cd ~/Desktop/Claude作業/LP制作_クライツ && python3 ga4_fetch.py</code><br>
+      <small>初回は GA4_SETUP.md の手順 (Service Account 作成) が必要です</small><br>
+      <small>エラー詳細: ${e.message}</small></div>
+      <div class="ok">📦 これまでに実装済の機能:<br>
+      ✅ GA4 タグ拡張 (UTM自動キャプチャ・電話/LINE/地図クリック計測)<br>
+      ✅ <a href="utm.html">UTM URL生成ツール</a> (チラシ・SNS別に計測可能)<br>
+      ✅ <a href="GA4_SETUP.md">GA4_SETUP.md セットアップ手順</a></div>`;
+    document.getElementById('updated').textContent = '(GA4 未連携)';
+  }
+}
+function render(d){
+  document.getElementById('content').style.display = 'block';
+  document.getElementById('updated').textContent = '最終更新: ' + new Date(d.generated_at).toLocaleString('ja-JP');
+  const s = d.summary || {};
+  document.getElementById('kpiPv').textContent = (s.total_pv_28d||0).toLocaleString();
+  document.getElementById('kpiPvAvg').textContent = '日平均 ' + (s.avg_pv_per_day||0) + ' PV';
+  document.getElementById('kpiUu').textContent = (s.total_uu_28d||0).toLocaleString();
+  document.getElementById('kpiSession').textContent = (s.total_sessions_28d||0).toLocaleString();
+  document.getElementById('kpiCall').textContent = s.cv_call_clicks||0;
+  document.getElementById('kpiLine').textContent = s.cv_line_clicks||0;
+  document.getElementById('kpiMaps').textContent = s.cv_maps_clicks||0;
+  document.getElementById('kpiRt').textContent = (d.realtime_active_users != null ? d.realtime_active_users : '-');
+
+  // 日次推移
+  const labels = (d.daily||[]).map(x => x.date ? (x.date.slice(4,6)+'/'+x.date.slice(6,8)) : '');
+  const pvs = (d.daily||[]).map(x => +x.screenPageViews||0);
+  const uus = (d.daily||[]).map(x => +x.totalUsers||0);
+  new Chart(document.getElementById('dailyChart'), {
+    type: 'line',
+    data: {labels, datasets:[
+      {label:'PV', data: pvs, borderColor:'#b08840', backgroundColor:'rgba(176,136,64,.15)', fill:true, tension:.2},
+      {label:'UU', data: uus, borderColor:'#3a5a3a', backgroundColor:'rgba(58,90,58,.15)', fill:true, tension:.2},
+    ]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}
+  });
+
+  // 表
+  fillTable('sourcesTable', (d.sources||[]).map(r => [r.sessionSource, r.sessionMedium, r.totalUsers, r.sessions, ((+r.engagementRate||0)*100).toFixed(0)+'%']));
+  fillTable('campaignsTable', (d.campaigns||[]).map(r => [r.sessionCampaignName||'(direct)', r.totalUsers, r.sessions]));
+  fillTable('devicesTable', (d.devices||[]).map(r => [r.deviceCategory, r.totalUsers, r.sessions]));
+  fillTable('eventsTable', (d.events||[]).map(r => [r.eventName, r.eventCount]));
+}
+function fillTable(id, rows){
+  const tb = document.querySelector('#'+id+' tbody');
+  tb.innerHTML = rows.map(r => '<tr>'+r.map(c => '<td>'+c+'</td>').join('')+'</tr>').join('');
+}
+load();
+</script>
+</body>
+</html>
