@@ -27,17 +27,63 @@
     setTimeout(function(){if(typeof gtag!=='undefined')gtag('event','time_30s')},30000);
     setTimeout(function(){if(typeof gtag!=='undefined')gtag('event','time_60s')},60000);
     setTimeout(function(){if(typeof gtag!=='undefined')gtag('event','time_180s')},180000);
-    // 電話タップ・メール・LINE・地図クリック を自動計測
+    // 電話タップ・メール・LINE・地図クリック を自動計測 (GA4 + 自前カウンタ両方)
     document.addEventListener('click', function(e){
-      var a = e.target.closest('a'); if (!a || typeof gtag === 'undefined') return;
+      var a = e.target.closest('a'); if (!a) return;
       var href = (a.getAttribute('href')||'').toLowerCase();
-      if (href.startsWith('tel:')) gtag('event','call_click',{tel:href.replace('tel:',''),location:a.textContent.trim().slice(0,30)});
-      else if (href.startsWith('mailto:')) gtag('event','email_click');
-      else if (href.includes('line.me')||href.includes('lin.ee')) gtag('event','line_click');
-      else if (href.includes('maps.google')||href.includes('maps.app')||href.includes('goo.gl/maps')) gtag('event','maps_click');
-      else if (href.includes('instagram.com')) gtag('event','sns_click',{platform:'instagram'});
-      else if (href.includes('youtube.com')||href.includes('youtu.be')) gtag('event','sns_click',{platform:'youtube'});
+      var evname = '';
+      if (href.startsWith('tel:')) evname='call';
+      else if (href.startsWith('mailto:')) evname='email';
+      else if (href.includes('line.me')||href.includes('lin.ee')) evname='line';
+      else if (href.includes('maps.google')||href.includes('maps.app')||href.includes('goo.gl/maps')) evname='maps';
+      else if (href.includes('instagram.com')) evname='sns_ig';
+      else if (href.includes('youtube.com')||href.includes('youtu.be')) evname='sns_yt';
+      if (!evname) return;
+      if (typeof gtag !== 'undefined') gtag('event', evname+'_click', {href:href.slice(0,80)});
+      try { selfTrack(evname); } catch(_){}
     }, true);
+
+    // 自前カウンタ (Fly.io ハシゴアプリ /lp-hit)
+    (function selfHostedTracker(){
+      var HASHIGO = 'https://hashigo-app.fly.dev/hashigo/lp-hit';
+      var qs = new URLSearchParams(location.search);
+      // visitor_id を localStorage で永続化 (UU 計測精度UP)
+      var vid = '';
+      try {
+        vid = localStorage.getItem('clt_vid') || '';
+        if (!vid) { vid = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); localStorage.setItem('clt_vid', vid); }
+      } catch(e){}
+      var common = {
+        visitor_id: vid,
+        page: location.pathname + location.hash,
+        referrer: document.referrer || '',
+        utm_source: (qs.get('utm_source')||sessionStorage.getItem('utm_source')||''),
+        utm_medium: (qs.get('utm_medium')||sessionStorage.getItem('utm_medium')||''),
+        utm_campaign: (qs.get('utm_campaign')||sessionStorage.getItem('utm_campaign')||''),
+        utm_content: (qs.get('utm_content')||sessionStorage.getItem('utm_content')||''),
+        utm_term: (qs.get('utm_term')||sessionStorage.getItem('utm_term')||''),
+      };
+      function hit(event, extra){
+        var p = Object.assign({event: event}, common, extra||{});
+        var s = new URLSearchParams(p).toString();
+        // navigator.sendBeacon 優先 (ページ離脱時も確実に送信)
+        try { if (navigator.sendBeacon) { navigator.sendBeacon(HASHIGO + '?' + s); return; } } catch(e){}
+        // フォールバック: img tag
+        var i = new Image(); i.src = HASHIGO + '?' + s + '&_t=' + Date.now();
+      }
+      window.selfTrack = hit;
+      // 初回 PV
+      hit('pageview');
+      // 30秒滞在
+      setTimeout(function(){hit('engaged_30s')}, 30000);
+      // スクロール50%・90%
+      var sent50=false, sent90=false;
+      window.addEventListener('scroll', function(){
+        var pct = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100;
+        if (pct > 50 && !sent50) { sent50=true; hit('scroll'); }
+        if (pct > 90 && !sent90) { sent90=true; hit('scroll'); }
+      }, {passive:true});
+    })();
   </script>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
